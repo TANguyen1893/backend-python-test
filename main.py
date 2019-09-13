@@ -20,7 +20,7 @@ def _run_sql(filename):
         )
     except subprocess.CalledProcessError as ex:
         print(ex.output)
-        os.exit(1)
+        os._exit(1)
 
 def initialize_database():
     _run_sql('resources/database.sql')
