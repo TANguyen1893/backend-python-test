@@ -40,6 +40,7 @@ def create_hashed_salted_password(password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     print(hashed_password)
+    return hashed_password
 
 if __name__ == '__main__':
     args = docopt(__doc__)
