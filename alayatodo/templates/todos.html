@@ -6,7 +6,7 @@
     <table class="table table-striped">
         <th>#</th><th>User</th><th>Description</th><th></th></th><th>Completed</th>
         <tbody>
-            {% for todo in todos %}
+            {% for todo in todos.items %}
                 <tr>
                     <td>{{ todo.id }}</td>
                     <td>{{ todo.user_id }}</td>
@@ -18,11 +18,14 @@
                     <td>
                         <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
                             <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
+                            <input type="hidden" name="current_page" value="{{ request.full_path }}">
                         </form>
                     </td>
                     <td>
                         <form method="post" action="{{ url_for('todo_complete', id=todo.id) }}">
                             <input type="hidden" name="complete" value="{{ todo.complete }}">
+                            <input type="hidden" name="current_page" value="{{ request.full_path }}">
+
                             <button type="submit" class="btn btn-sm"><span class="glyphicon {% if todo.complete == 0%}glyphicon-thumbs-down{% else %}glyphicon glyphicon-thumbs-up{% endif %} glyphicon-white"></span></button>
                         </form>
                     </td>
@@ -45,5 +48,13 @@
             </form>
         </tr>
     </table>
+    <ul class="pager">
+    {% if previous %}
+        <li class="previous"><a href="{{ previous }}">Previous</a></li>
+    {% endif %}
+    {% if next %}
+        <li class="next"><a href="{{ next }}">Next</a></a></li>
+    {% endif %}
+        </ul>
 </div>
 {% endblock %}

@@ -7,9 +7,11 @@ from flask import (
     redirect,
     render_template,
     request,
-    session
+    session,
+    url_for
     )
 
+RESULTS_PER_PAGE = 10
 
 @app.route('/')
 def home():
@@ -69,9 +71,11 @@ def todo_json(id):
 def todos():
     if not session.get('logged_in'):
         return redirect('/login')
-    todos = Todos.query.filter_by(user_id=session['user']['id']).all()
-    return render_template('todos.html', todos=todos)
-
+    current_page = request.args.get('page', 1, type=int)
+    todos = Todos.query.filter_by(user_id=session['user']['id']).paginate(page=current_page, per_page=RESULTS_PER_PAGE, error_out=False)
+    previous_page = url_for('todos', page=todos.prev_num) if todos.has_prev else None
+    next_page = url_for('todos', page=todos.next_num) if todos.has_next else None
+    return render_template('todos.html', todos=todos, previous=previous_page, next=next_page)
 
 @app.route('/todo', methods=['POST'])
 @app.route('/todo/', methods=['POST'])
@@ -92,15 +96,21 @@ def todo_complete(id):
     if not session.get('logged_in'):
         return redirect('/login')
     complete = 1 - int(request.form.get('complete', 1))
+    current_page = request.form.get('current_page')
+    if not current_page:
+        current_page = '/todo'
     database.session.query(Todos).filter_by(id=id, user_id=session['user']['id']).update({"complete":complete})
     database.session.commit()
-    return redirect('/todo')
+    return redirect(current_page)
 
 @app.route('/todo/<id>', methods=['POST'])
 def todo_delete(id):
     if not session.get('logged_in'):
         return redirect('/login')
+    current_page = request.form.get('current_page')
+    if not current_page:
+        current_page = '/todo'
     database.session.query(Todos).filter_by(id=id, user_id=session['user']['id']).delete()
     database.session.commit()
     flash('You have just deleted a todo!')
-    return redirect('/todo')
+    return redirect(current_page)
