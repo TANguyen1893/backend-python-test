@@ -47,17 +47,20 @@ def logout():
 
 @app.route('/todo/<id>', methods=['GET'])
 def todo(id):
-    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s';" % id)
+    if not session.get('logged_in'):
+        return redirect('/login')
+    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s' AND user_id=%s;" % (id, session['user']['id']))
     todo = cur.fetchone()
+    if not todo:
+        return make_response(dict(status="Not found", code="404", message="This todo item could not be found or you are not authorized to view it"), 404)
     return render_template('todo.html', todo=todo)
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_json(id):
     if not session.get('logged_in'):
         return redirect('/login')
-    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s' AND user_id=%d;" % (id, int(session['user']['id'])))
+    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s' AND user_id=%s;" % (id, session['user']['id']))
     todo = cur.fetchone()
-    print(todo)
     if not todo:
         return make_response(dict(status="Not found", code="404", message="This todo item could not be found or you are not authorized to view it"), 404)
     return jsonify(dict(todo))
@@ -67,7 +70,7 @@ def todo_json(id):
 def todos():
     if not session.get('logged_in'):
         return redirect('/login')
-    cur = g.db.execute("SELECT * FROM todos;")
+    cur = g.db.execute("SELECT * FROM todos WHERE user_id=%s;" % session['user']['id'])
     todos = cur.fetchall()
     return render_template('todos.html', todos=todos)
 
@@ -93,8 +96,8 @@ def todo_complete(id):
         return redirect('/login')
     complete = 1 - int(request.form.get('complete', 1))
     g.db.execute(
-        "UPDATE todos SET complete = %d WHERE user_id = %d and id = %d;"
-        % (int(complete), int(session['user']['id']), int(id))
+        "UPDATE todos SET complete = %s WHERE user_id = %s and id = %s;"
+        % (complete, session['user']['id'], id)
     )
     g.db.commit()
     return redirect('/todo')
