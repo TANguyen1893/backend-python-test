@@ -20,6 +20,11 @@
                     <button type="submit" class="btn btn-sm"><span class="glyphicon {% if todo.complete == 0%}glyphicon-thumbs-down{% else %}glyphicon glyphicon-thumbs-up{% endif %} glyphicon-white"></span></button>
                 </form>
             </td>
+            <td>
+                <form method="get" target="_blank" action="{{ url_for('todo_json', id=todo.id) }}">
+                    <button type="submit" class="btn btn-xs btn-primary">JSON</button>
+                </form>
+            </td>
         </tr>
     </table>
 </div>
