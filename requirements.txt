@@ -3,3 +3,5 @@ Jinja2
 docopt
 pytest
 flask_sqlalchemy
+passlib
+bcrypt

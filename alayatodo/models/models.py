@@ -1,9 +1,13 @@
 from alayatodo import database
+from passlib.hash import bcrypt
 
 class Users(database.Model):
     id = database.Column(database.Integer, primary_key=True)
     username = database.Column(database.String(255), nullable=False)
     password = database.Column(database.String(255), nullable=False)
+
+    def does_password_match(self, password):
+        return bcrypt.verify(password, self.password)
 
     def serialize(self):
         return dict(id=self.id, username=self.username, password=self.password)

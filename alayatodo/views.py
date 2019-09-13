@@ -2,7 +2,6 @@ from alayatodo import app, database
 from alayatodo.models.models import *
 from flask import (
     flash,
-    g,
     jsonify,
     make_response,
     redirect,
@@ -30,7 +29,7 @@ def login_POST():
     password = request.form.get('password')
 
     user = Users.query.filter_by(username=username).first()
-    if not user or password != user.password:
+    if not user or not user.does_password_match(password):
         flash("Invalid user name or password")
         return redirect('/login')
 
@@ -84,7 +83,7 @@ def todos_POST():
         return make_response("You must enter a description", 400)
     todo = Todos(user_id=session['user']['id'], description=description)
     database.session.add(todo)
-    result = database.session.commit()
+    database.session.commit()
     flash('You have just added a todo!')
     return redirect('/todo')
 
