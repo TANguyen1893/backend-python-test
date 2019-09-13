@@ -15,5 +15,4 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 database = SQLAlchemy(app)
 
-
 import alayatodo.views

@@ -9,9 +9,10 @@ from flask import (
     request,
     session,
     url_for
-    )
+)
 
 RESULTS_PER_PAGE = 10
+
 
 @app.route('/')
 def home():
@@ -40,7 +41,6 @@ def login_POST():
     return redirect('/todo')
 
 
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
@@ -54,8 +54,10 @@ def todo(id):
         return redirect('/login')
     todo = Todos.query.filter_by(id=id, user_id=session['user']['id']).first()
     if not todo:
-        return make_response(dict(status="Not found", code="404", message="This todo item could not be found or you are not authorized to view it"), 404)
+        return make_response(dict(status="Not found", code="404",
+                                  message="This todo item could not be found or you are not authorized to view it"), 404)
     return render_template('todo.html', todo=todo)
+
 
 @app.route('/todo/<id>/json', methods=['GET'])
 def todo_json(id):
@@ -63,8 +65,10 @@ def todo_json(id):
         return redirect('/login')
     todo = Todos.query.filter_by(id=id, user_id=session['user']['id']).first()
     if not todo:
-        return make_response(dict(status="Not found", code="404", message="This todo item could not be found or you are not authorized to view it"), 404)
+        return make_response(dict(status="Not found", code="404",
+                                  message="This todo item could not be found or you are not authorized to view it"), 404)
     return jsonify(todo.serialize())
+
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
@@ -72,10 +76,19 @@ def todos():
     if not session.get('logged_in'):
         return redirect('/login')
     current_page = request.args.get('page', 1, type=int)
-    todos = Todos.query.filter_by(user_id=session['user']['id']).paginate(page=current_page, per_page=RESULTS_PER_PAGE, error_out=False)
-    previous_page = url_for('todos', page=todos.prev_num) if todos.has_prev else None
-    next_page = url_for('todos', page=todos.next_num) if todos.has_next else None
-    return render_template('todos.html', todos=todos, previous=previous_page, next=next_page)
+    todos = Todos.query.filter_by(
+        user_id=session['user']['id']).paginate(
+        page=current_page,
+        per_page=RESULTS_PER_PAGE,
+        error_out=False)
+    previous_page = url_for(
+        'todos', page=todos.prev_num) if todos.has_prev else None
+    next_page = url_for(
+        'todos',
+        page=todos.next_num) if todos.has_next else None
+    return render_template('todos.html', todos=todos,
+                           previous=previous_page, next=next_page)
+
 
 @app.route('/todo', methods=['POST'])
 @app.route('/todo/', methods=['POST'])
@@ -91,6 +104,7 @@ def todos_POST():
     flash('You have just added a todo!')
     return redirect('/todo')
 
+
 @app.route('/todo/<id>/complete', methods=['POST'])
 def todo_complete(id):
     if not session.get('logged_in'):
@@ -99,9 +113,11 @@ def todo_complete(id):
     current_page = request.form.get('current_page')
     if not current_page:
         current_page = '/todo'
-    database.session.query(Todos).filter_by(id=id, user_id=session['user']['id']).update({"complete":complete})
+    database.session.query(Todos).filter_by(
+        id=id, user_id=session['user']['id']).update({"complete": complete})
     database.session.commit()
     return redirect(current_page)
+
 
 @app.route('/todo/<id>', methods=['POST'])
 def todo_delete(id):
@@ -110,7 +126,8 @@ def todo_delete(id):
     current_page = request.form.get('current_page')
     if not current_page:
         current_page = '/todo'
-    database.session.query(Todos).filter_by(id=id, user_id=session['user']['id']).delete()
+    database.session.query(Todos).filter_by(
+        id=id, user_id=session['user']['id']).delete()
     database.session.commit()
     flash('You have just deleted a todo!')
     return redirect(current_page)
